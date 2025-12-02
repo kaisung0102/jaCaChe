@@ -1,4 +1,4 @@
-package kamacache
+package jacache
 
 import "strings"
 

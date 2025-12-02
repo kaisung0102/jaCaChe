@@ -9,13 +9,13 @@ type Value interface {
 
 // Store 缓存接口
 type Store interface {
-	Get(key string) (Value, bool)
-	Set(key string, value Value) error
-	SetWithExpiration(key string, value Value, expiration time.Duration) error
-	Delete(key string) bool
-	Clear()
-	Len() int
-	Close()
+	Get(key string) (Value, bool)                                              // 获取缓存值
+	Set(key string, value Value) error                                         // 设置缓存值
+	SetWithExpiration(key string, value Value, expiration time.Duration) error // 设置带过期时间的缓存值
+	Delete(key string) bool                                                    // 删除缓存值
+	Clear()                                                                    // 清空缓存
+	Len() int                                                                  // 返回缓存的当前存储项数量
+	Close()                                                                    // 关闭缓存，释放资源
 }
 
 // CacheType 缓存类型

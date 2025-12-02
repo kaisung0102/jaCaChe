@@ -48,7 +48,7 @@ func main() {
 	// 启动节点
 	go func() {
 		log.Printf("[节点%s] 开始启动服务...", *nodeID)
-		if err := node.Start(); err != nil {
+		if err = node.Start(); err != nil {
 			log.Fatal("启动节点失败:", err)
 		}
 	}()

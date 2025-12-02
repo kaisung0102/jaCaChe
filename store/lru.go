@@ -8,16 +8,16 @@ import (
 
 // lruCache 是基于标准库 list 的 LRU 缓存实现
 type lruCache struct {
-	mu              sync.RWMutex
-	list            *list.List               // 双向链表，用于维护 LRU 顺序
-	items           map[string]*list.Element // 键到链表节点的映射
-	expires         map[string]time.Time     // 过期时间映射
-	maxBytes        int64                    // 最大允许字节数
-	usedBytes       int64                    // 当前使用的字节数
-	onEvicted       func(key string, value Value)
-	cleanupInterval time.Duration
-	cleanupTicker   *time.Ticker
-	closeCh         chan struct{} // 用于优雅关闭清理协程
+	mu              sync.RWMutex 					// 读写锁，用于保护并发访问	
+	list            *list.List               		// 双向链表，用于维护 LRU 顺序
+	items           map[string]*list.Element 		// 键到链表节点的映射
+	expires         map[string]time.Time     		// 过期时间映射
+	maxBytes        int64                    		// 最大允许字节数
+	usedBytes       int64                    		// 当前使用的字节数
+	onEvicted       func(key string, value Value) 	// 缓存项被移除时的回调函数
+	cleanupInterval time.Duration            		// 清理间隔
+	cleanupTicker   *time.Ticker             		// 清理定时器	
+	closeCh         chan struct{}            		// 用于优雅关闭清理协程	
 }
 
 // lruEntry 表示缓存中的一个条目
@@ -93,7 +93,7 @@ func (c *lruCache) Set(key string, value Value) error {
 
 // SetWithExpiration 添加或更新缓存项，并设置过期时间
 func (c *lruCache) SetWithExpiration(key string, value Value, expiration time.Duration) error {
-	if value == nil {
+	if value == nil { // 不允许设置 nil 值
 		c.Delete(key)
 		return nil
 	}
@@ -107,7 +107,7 @@ func (c *lruCache) SetWithExpiration(key string, value Value, expiration time.Du
 		expTime = time.Now().Add(expiration)
 		c.expires[key] = expTime
 	} else {
-		delete(c.expires, key)
+		delete(c.expires, key) // 清除过期时间（无过期时间）
 	}
 
 	// 如果键已存在，更新值
@@ -187,7 +187,7 @@ func (c *lruCache) evict() {
 	// 先清理过期项
 	now := time.Now()
 	for key, expTime := range c.expires {
-		if now.After(expTime) {
+		if now.After(expTime) { // 检查是否过期
 			if elem, ok := c.items[key]; ok {
 				c.removeElement(elem)
 			}
